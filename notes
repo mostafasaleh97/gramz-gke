@@ -1,0 +1,48 @@
+To use your gcloud credentials, run 'gcloud auth application-default login'
+gcloud auth login
+gcloud config set project [PROJECT_ID]
+gcloud auth application-default login
+
+gcloud iam service-accounts create terraform --display-name "Terraform Admin"
+
+
+gcloud projects add-iam-policy-binding trusty-coder-386913 \
+--member="serviceAccount:terraform@trusty-coder-386913.iam.gserviceaccount.com" \
+--role="roles/editor"
+
+gcloud iam service-accounts keys create ~/terraform-key.json \
+--iam-account terraform@[PROJECT_ID].iam.gserviceaccount.com
+
+
+
+export GOOGLE_APPLICATION_CREDENTIALS=~/Downloads/trusty-coder-386913-1ac0ec59b8a1.json 
+
+
+
+#Connect to basion host
+
+
+#connect to cluster
+gcloud container clusters get-credentials private-gke-cluster --region us-central1 --project trusty-coder-386913
+
+
+
+gcloud projects add-iam-policy-binding my-project-377213 \
+--member="serviceAccount:basion-sa@my-project-377213.gserviceaccount.com" \
+--role="roles/editor"
+
+
+
+│ Error: Error waiting for creating GKE cluster: 
+│       - Google Compute Engine: Not all instances running in IGM after 15.156837356s. Expected 1, running 0, transitioning 1. Current errors: [PERMISSIONS_ERROR]: Instance 'gke-private-gke-cluster-default-pool-b9c5bcd0-ptjv' creation failed: Required 'compute.instances.create' permission for 'projects/153380946231/zones/us-central1-b/instances/gke-private-gke-cluster-default-pool-b9c5bcd0-ptjv' (when acting as '153380946231@cloudservices.gserviceaccount.com'); [PERMISSIONS_ERROR]: Instance 'gke-private-gke-cluster-default-pool-b9c5bcd0-ptjv' creation failed: Required 'compute.disks.create' permission for 'projects/153380946231/zones/us-central1-b/disks/gke-private-gke-cluster-default-pool-b9c5bcd0-ptjv' (when acting as '153380946231@cloudservices.gserviceaccount.com'); [PERMISSIONS_ERROR]: Instance 'gke-private-gke-cluster-default-pool-b9c5bcd0-ptjv' creation failed: Required 'compute.disks.setLabels' permission for 'projects/153380946231/zones/us-central1-b/disks/gke-private-gke-cluster-default-pool-b9c5bcd0-ptjv' (when acting as '153380946231@cloudservices.gserviceaccount.com'); [PERMISSIONS_ERROR]: Instance 'gke-private-gke-cluster-default-pool-b9c5bcd0-ptjv' creation failed: Required 'compute.subnetworks.use' permission for 'projects/153380946231/regions/us-central1/subnetworks/private-subnet-1' (when acting as '153380946231@cloudservices.gserviceaccount.com'); [PERMISSIONS_ERROR]: Instance 'gke-private-gke-cluster-default-pool-b9c5bcd0-ptjv' creation failed: Required 'compute.instances.setMetadata' permission for 'projects/153380946231/zones/us-central1-b/instances/gke-private-gke-cluster-default-pool-b9c5bcd0-ptjv' (when acting as '153380946231@cloudservices.gserviceaccount.com') (truncated)
+│       - Google Compute Engine: Not all instances running in IGM after 15.997137831s. Expected 1, running 0, transitioning 1. Current errors: [PERMISSIONS_ERROR]: Instance 'gke-private-gke-cluster-default-pool-6a235a99-m5gt' creation failed: Required 'compute.instances.create' permission for 'projects/153380946231/zones/us-central1-c/instances/gke-private-gke-cluster-default-pool-6a235a99-m5gt' (when acting as '153380946231@cloudservices.gserviceaccount.com'); [PERMISSIONS_ERROR]: Instance 'gke-private-gke-cluster-default-pool-6a235a99-m5gt' creation failed: Required 'compute.disks.create' permission for 'projects/153380946231/zones/us-central1-c/disks/gke-private-gke-cluster-default-pool-6a235a99-m5gt' (when acting as '153380946231@cloudservices.gserviceaccount.com'); [PERMISSIONS_ERROR]: Instance 'gke-private-gke-cluster-default-pool-6a235a99-m5gt' creation failed: Required 'compute.disks.setLabels' permission for 'projects/153380946231/zones/us-central1-c/disks/gke-private-gke-cluster-default-pool-6a235a99-m5gt' (when acting as '153380946231@cloudservices.gserviceaccount.com'); [PERMISSIONS_ERROR]: Instance 'gke-private-gke-cluster-default-pool-6a235a99-m5gt' creation failed: Required 'compute.subnetworks.use' permission for 'projects/153380946231/regions/us-central1/subnetworks/private-subnet-1' (when acting as '153380946231@cloudservices.gserviceaccount.com'); [PERMISSIONS_ERROR]: Instance 'gke-private-gke-cluster-default-pool-6a235a99-m5gt' creation failed: Required 'compute.instances.setMetadata' permission for 'projects/153380946231/zones/us-central1-c/instances/gke-private-gke-cluster-default-pool-6a235a99-m5gt' (when acting as '153380946231@cloudservices.gserviceaccount.com') (truncated)
+│       - Google Compute Engine: Not all instances running in IGM after 18.266085527s. Expected 1, running 0, transitioning 1. Current errors: [PERMISSIONS_ERROR]: Required 'compute.instanceGroups.update' permission for 'projects/153380946231/zones/us-central1-a/instanceGroups/gke-private-gke-cluster-default-pool-68eca2bc-grp'.
+│ 
+│   with google_container_cluster.private_gke_cluster,
+│   on gke.tf line 1, in resource "google_container_cluster" "private_gke_cluster":
+│    1: resource "google_container_cluster" "private_gke_cluster" {
+
+
+
+
+│ Error: Request `Set IAM Binding for role "roles/editor" on "project \"my-project-377213\""` returned error: Batch request and retried single request "Set IAM Binding for role \"roles/editor\" on \"project \\\"my-project-377213\\\"\"" both failed. Final error: Error applying IAM policy for project "my-project-377213": Error setting IAM policy for project "my-project-377213": googleapi: Error 403: Policy update access denied., forbidden

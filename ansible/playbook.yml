@@ -1,0 +1,153 @@
+- name: basion-playbook
+  hosts: all
+  gather_facts: no
+  become: yes
+  tasks:
+
+    - name: install kubectl on bastion host
+      shell: |
+        sudo apt install curl -y
+        curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubectl
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin/kubectl
+        kubectl version --client
+    
+    - name: Install dependencies
+      apt:
+        name: 
+          - apt-transport-https
+          - ca-certificates
+          - gnupg
+          - curl
+        state: present
+        update_cache: yes
+
+    - name: Add Google Cloud public key to APT
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+
+    - name: Add Google Cloud SDK repository
+      apt_repository:
+        repo: "deb https://packages.cloud.google.com/apt cloud-sdk main"
+        filename: "google-cloud-sdk"
+        state: present
+
+    - name: Update the apt package index
+      apt:
+        update_cache: yes
+
+    # - name: Install Google Cloud SDK (gcloud)
+    #   apt:
+    #     name: google-cloud-sdk
+    #     state: present
+
+    - name: Install gke-gcloud-auth-plugin
+      apt:
+        name: google-cloud-sdk-gke-gcloud-auth-plugin
+        state: present
+
+    # - name: Verify gke-gcloud-auth-plugin installation
+    #   shell: gcloud components list | grep 'gke-gcloud-auth-plugin'
+    #   register: verify_plugin
+
+    # - name: Show gke-gcloud-auth-plugin installation result
+    #   debug:
+    #     var: verify_plugin.stdout
+
+    - name: install helm
+      shell: |
+        curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+    -  name: enable namepace switch
+       copy:
+         src: /usr/local/bin/ns
+         dest: /usr/local/bin/ns
+
+    - name: chmod ns command
+      shell: chmod +x   /usr/local/bin/ns   
+
+
+- name: Conf in clusters
+  hosts: all
+  remote_user: ubuntu
+  tasks:
+
+    # - name: copy cred file to bastion
+    #   copy:
+    #     src: /home/mostafa/Downloads/my-project-377213-3061fc3d3aa8.json
+    #     dest: /home/ubuntu/my-project-377213-3061fc3d3aa8.json
+
+    # - name: Give Access to baion-sa
+    #   shell: |
+    #     cd  /home/ubuntu/
+    #     export GOOGLE_APPLICATION_CREDENTIALS=~/Downloads/my-project-377213-3061fc3d3aa8.json
+        # gcloud projects add-iam-policy-binding my-project-377213 \
+        # --member="serviceAccount:bastion-sa@my-project-377213.iam.gserviceaccount.com" \
+        # --role="roles/editor"
+
+        # gcloud projects add-iam-policy-binding my-project-377213 \
+        # --member="serviceAccount:bastion-sa@my-project-377213.iam.gserviceaccount.com" \
+        # --role="roles/container.admin"
+
+
+    - name: connect to gke-cluster
+      shell: "gcloud container clusters get-credentials private-gke-cluster --region us-central1 --project my-project-377213"
+      
+
+
+- name: copy the helm for ingress controller and install it
+  hosts: all 
+  tasks:
+    - name: copy the helm chart
+      synchronize:
+        src: /home/$USER/Technical/gramz-prod/ansible/nginx-ingress-controller.tar.gz
+        dest: /home/ubuntu/ingress-controller.tar.gz
+      delegate_to: localhost
+
+    - name: uncompress the helm chart
+      shell: |
+        cd /home/ubuntu/
+        tar zxvf /home/ubuntu/ingress-controller.tar.gz
+
+    - name: install the ingress controller
+      shell: |
+        cur_ingress=$(kubectl get pods -n ingress-controller | grep ingress-nginx-controller | awk '{print $1}')
+        if [ -z "$cur_ingress" ]; then
+            cd /home/ubuntu
+            helm install ingress-controller ./nginx-ingress-controller/ -n ingress-controller --create-namespace
+        fi
+      tags: ingress
+
+    - name: copy secret files and ingress file
+      synchronize:
+        src: "{{ item }}"
+        dest: /home/ubuntu/
+      loop:
+        - cert.crt
+        - key.key
+        - argocd-ingress.yml  
+      delegate_to: localhost
+
+    - name: create secret and intall argocd
+      shell: |
+        kubectl create namespace argocd
+        kubectl create secret tls gramz-tls --key key.key --cert cert.crt -n argocd
+        kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+        kubectl apply -f argocd-ingress.yml -n argocd
+    
+- name: add k8s autocomplete to bash
+  hosts: all
+  tasks:
+    - name: add k8s autocomplete to bash
+      shell: |
+        sudo apt install -y bash-completion && echo "source <(kubectl completion bash)" >> ~/.bashrc && source ~/.bashrc
+      args:
+        executable: /bin/bash
+
+    -  name: enable namepace switch
+       copy:
+         src: /usr/local/bin/ns
+         dest: /usr/local/bin/ns
+
+    - name: chmod ns command
+      shell: chmod +x   /usr/local/bin/ns   
