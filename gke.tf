@@ -1,6 +1,6 @@
 resource "google_container_cluster" "private_gke_cluster" {
-  provider = "google-beta"
-  project = "my-project-377213"
+  # provider = "google-beta"
+  # project = "my-project-377213"
   name               = "private-gke-cluster"
   location           = "us-central1"
   # remove_default_node_pool = true
@@ -74,9 +74,9 @@ resource "google_container_cluster" "private_gke_cluster" {
     network_policy_config {
         disabled = false
       }
-    istio_config {
-        disabled = false
-    }
+    # istio_config {
+    #     disabled = false
+    # }
     
   }
  
