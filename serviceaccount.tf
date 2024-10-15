@@ -10,7 +10,16 @@ resource "google_project_iam_binding" "cluster-account-iam" {
   members = [
     "serviceAccount:bastion-sa@my-project-377213.iam.gserviceaccount.com",
   ]
+  
 }
+# resource "google_project_iam_binding" "node-account-iam" {
+#   project = "my-project-377213"
+#   role               = "roles/compute.instances.get"           
+#   members = [
+#     "serviceAccount:bastion-sa@my-project-377213.iam.gserviceaccount.com",
+#   ]
+  
+
 
 # resource "google_project_iam_binding" "admin-account-iam" {
 #   project = "my-project-377213"

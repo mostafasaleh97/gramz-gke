@@ -144,10 +144,4 @@
       args:
         executable: /bin/bash
 
-    -  name: enable namepace switch
-       copy:
-         src: /usr/local/bin/ns
-         dest: /usr/local/bin/ns
-
-    - name: chmod ns command
-      shell: chmod +x   /usr/local/bin/ns   
+  

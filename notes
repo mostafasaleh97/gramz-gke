@@ -29,7 +29,7 @@ gcloud container clusters get-credentials private-gke-cluster --region us-centra
 
 gcloud projects add-iam-policy-binding my-project-377213 \
 --member="serviceAccount:basion-sa@my-project-377213.gserviceaccount.com" \
---role="roles/editor"
+--role="roles/compute.instances.get"
 
 
 
