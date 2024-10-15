@@ -32,7 +32,7 @@ resource "google_compute_instance" "bastion" {
   tags = ["bastion"]
 
   metadata = {
-    ssh-keys = "ubuntu:${file("~/.ssh/gitlab.pub")}"
+    ssh-keys = "ubuntu:${file("./gitlab.pub")}"
   }
 }
 
